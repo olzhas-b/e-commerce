@@ -1,0 +1,21 @@
+httpServer:
+  host: "0.0.0.0"
+  port: 8085
+  shutDownTimeout: 5000
+grpcServer:
+  host: "0.0.0.0"
+  port: 8080
+  shutDownTimeout: 5000
+services:
+  loms:
+    addr: "0.0.0.0:8081"
+  productService:
+    addr: "route256.pavl.uk:8082"
+    token: "n9la6AzjMAl9IYNOoxQpjA8d"
+    rps: 10
+postgres:
+  host: "0.0.0.0"
+  user: "postgres"
+  password: "postgres"
+  db: "postgres"
+  port: 5434

@@ -1,0 +1,106 @@
+version: "3.1"
+services:
+  checkout:
+    image: checkout
+    build: ./checkout/
+    container_name: 'checkout'
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - pgbouncer-checkout
+    networks:
+      - net
+  loms:
+    image: loms
+    build: ./loms/
+    container_name: 'loms'
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    depends_on:
+      - pgbouncer-loms
+    networks:
+      - net
+
+  postgres-checkout:
+    image: postgres
+    restart: unless-stopped
+    container_name: 'postgres-checkout'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+        - "5434:5432"
+    volumes:
+      - .:/var/lib/postgresql/data/checkout
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - net
+
+  postgres-loms:
+    image: postgres
+    restart: unless-stopped
+    container_name: 'postgres-loms'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+        - "5435:5432"
+    volumes:
+      - .:/var/lib/postgresql/data/loms
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - net
+
+  pgbouncer-checkout:
+    image: bitnami/pgbouncer:latest
+    restart: unless-stopped
+    container_name: pgbouncer-checkout
+    ports:
+      - "6432:6432"
+    environment:
+      POSTGRESQL_HOST: "postgres-checkout"
+      POSTGRESQL_USERNAME: "postgres"
+      POSTGRESQL_PASSWORD: "postgres"
+      POSTGRESQL_PORT: "5432"
+      PGBOUNCER_IGNORE_STARTUP_PARAMETERS: "extra_float_digits"
+    depends_on:
+      postgres-checkout:
+        condition: service_healthy
+    networks:
+      - net
+
+  pgbouncer-loms:
+    image: bitnami/pgbouncer:latest
+    restart: unless-stopped
+    container_name: pgbouncer-loms
+    ports:
+      - "6433:6432"
+    environment:
+      POSTGRESQL_HOST: "postgres-loms"
+      POSTGRESQL_USERNAME: "postgres"
+      POSTGRESQL_PASSWORD: "postgres"
+      POSTGRESQL_PORT: "5432"
+      PGBOUNCER_IGNORE_STARTUP_PARAMETERS: "extra_float_digits"
+    depends_on:
+      postgres-loms:
+        condition: service_healthy
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge

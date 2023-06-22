@@ -1,0 +1,18 @@
+httpServer:
+  host: "0.0.0.0"
+  port: 8086
+  shutdownTimeout: 5000
+grpcServer:
+  host: "0.0.0.0"
+  port: 8081
+  shutdownTimeout: 5000
+postgres:
+  host: "pgbouncer-loms"
+  user: "postgres"
+  password: "postgres"
+  db: "postgres"
+  port: 6432
+jobs:
+  cancelOrder:
+    interval: 10000
+    expiresTime: 300000
